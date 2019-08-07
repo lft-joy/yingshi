@@ -1,31 +1,34 @@
 <template>
     <div class="movie_body">
-        <ul>
-            <!--<li>-->
-            <!--<div class="pic_show"><img src="/images/movie_2.jpg"></div>-->
-            <!--<div class="info_list">-->
-            <!--<h2>毒液：致命守护者</h2>-->
-            <!--<p><span class="person">2346</span> 人想看</p>-->
-            <!--<p>主演: 汤姆·哈迪,米歇尔·威廉姆斯,里兹·阿迈德</p>-->
-            <!--<p>2018-11-30上映</p>-->
-            <!--</div>-->
-            <!--<div class="btn_pre">-->
-            <!--预售-->
-            <!--</div>-->
-            <!--</li>-->
-            <li v-for="item in comingList" :key="item.id">
-                <div class="pic_show"><img :src="item.img | setWH('128.180')"></div>
-                <div class="info_list">
-                    <h2>{{item.nm}}</h2>
-                    <p><span class="person">{{item.wish}}</span> 人想看</p>
-                    <p>主演: {{item.star}}</p>
-                    <p>{{item.showInfo}}</p>
-                </div>
-                <div class="btn_pre">
-                    预售
-                </div>
-            </li>
-        </ul>
+        <Loading v-if="isLoading"/>
+        <scroller>
+            <ul>
+                <!--<li>-->
+                <!--<div class="pic_show"><img src="/images/movie_2.jpg"></div>-->
+                <!--<div class="info_list">-->
+                <!--<h2>毒液：致命守护者</h2>-->
+                <!--<p><span class="person">2346</span> 人想看</p>-->
+                <!--<p>主演: 汤姆·哈迪,米歇尔·威廉姆斯,里兹·阿迈德</p>-->
+                <!--<p>2018-11-30上映</p>-->
+                <!--</div>-->
+                <!--<div class="btn_pre">-->
+                <!--预售-->
+                <!--</div>-->
+                <!--</li>-->
+                <li v-for="item in comingList" :key="item.id">
+                    <div class="pic_show"><img :src="item.img | setWH('128.180')"></div>
+                    <div class="info_list">
+                        <h2>{{item.nm}}</h2>
+                        <p><span class="person">{{item.wish}}</span> 人想看</p>
+                        <p>主演: {{item.star}}</p>
+                        <p>{{item.showInfo}}</p>
+                    </div>
+                    <div class="btn_pre">
+                        预售
+                    </div>
+                </li>
+            </ul>
+        </scroller>
     </div>
 </template>
 
@@ -34,17 +37,27 @@
         name: "ComingSoon",
         data() {
             return {
-                comingList: []
+                comingList: [],
+                prevCityId: -1,
+                isLoading: true
             }
         },
-        mounted() {
-            this.axios.get('/api/movieComingList?cityId=30').then((res) => {
+        activated() {
+            var cityId = this.$store.state.city.id;
+            if (this.prevCityId === cityId) {
+                return;
+            }
+            this.isLoading = true;
+
+            this.axios.get('/api/movieComingList?cityId=' + cityId).then((res) => {
                 var msg = res.data.msg;
                 if (msg === 'ok') {
                     this.comingList = res.data.data.comingList;
+                    this.prevCityId = cityId;
+                    this.isLoading = false
                 }
             });
-        }
+        },
 
     }
 </script>
@@ -70,7 +83,7 @@
 
     .movie_body .pic_show {
         width: 64px;
-        height: 90px;
+        height: 94px;
     }
 
     .movie_body .pic_show img {
